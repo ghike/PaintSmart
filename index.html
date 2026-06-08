@@ -1,0 +1,1857 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PaintSmart — Product & Competitive Analysis</title>
+  <style>
+    :root {
+      --bg: #edf4fb;
+      --ink: #18212f;
+      --muted: #5a6b85;
+      --blue: #1774d1;
+      --blue-2: #0f5fb2;
+      --soft: #dfeaf7;
+      --soft-2: #f8fbff;
+      --card: #ffffff;
+      --line: rgba(24, 33, 47, .10);
+      --shadow: 0 18px 50px rgba(16, 44, 84, .10);
+      --radius: 28px;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink)
+    }
+
+    .deck {
+      height: 100vh;
+      overflow-y: auto;
+      scroll-snap-type: y mandatory
+    }
+
+    .slide {
+      position: relative;
+      min-height: 100vh;
+      scroll-snap-align: start;
+      padding: 26px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 12% 18%, rgba(23, 116, 209, .10), transparent 0 28%), radial-gradient(circle at 88% 78%, rgba(23, 116, 209, .08), transparent 0 24%), linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
+      overflow: hidden
+    }
+
+    .slide::before {
+      content: '';
+      position: absolute;
+      inset: 22px;
+      border-radius: 38px;
+      border: 1px solid rgba(255, 255, 255, .65);
+      pointer-events: none
+    }
+
+    .slide::after {
+      content: '';
+      position: absolute;
+      width: 520px;
+      height: 520px;
+      right: -180px;
+      top: -180px;
+      background: radial-gradient(circle, rgba(23, 116, 209, .10), rgba(23, 116, 209, 0) 68%);
+      filter: blur(10px);
+      pointer-events: none
+    }
+
+    .frame {
+      position: relative;
+      z-index: 2;
+      max-width: 1380px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 22px;
+      opacity: .3;
+      transform: translateY(10px);
+      transition: opacity .9s ease, transform 1.2s cubic-bezier(.16, 1, .3, 1), filter .9s ease;
+      filter: blur(1px)
+    }
+
+    .frame.compact {
+      min-height: auto;
+      max-height: calc(100vh - 52px);
+      justify-content: center
+    }
+
+    .frame.compact .bento {
+      align-content: center
+    }
+
+    .slide.in-view .frame {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0)
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 4px
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px
+    }
+
+    .brand img {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #fff;
+      box-shadow: var(--shadow)
+    }
+
+    .brand .meta {
+      display: flex;
+      flex-direction: column
+    }
+
+    .brand .meta strong {
+      font-size: 15px;
+      letter-spacing: .02em
+    }
+
+    .brand .meta span {
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .page {
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .headline {
+      padding: 24px 6px 0 4px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      line-height: 1.04
+    }
+
+    h1 {
+      font-size: 66px;
+      letter-spacing: -.04em;
+      max-width: 820px
+    }
+
+    h2 {
+      font-size: 42px;
+      letter-spacing: -.03em
+    }
+
+    h3 {
+      font-size: 22px
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: #e9f2ff;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .02em;
+      width: max-content
+    }
+
+    .lead {
+      font-size: 22px;
+      line-height: 1.42;
+      color: #33425b;
+      max-width: 860px;
+      margin-top: 18px
+    }
+
+    .note {
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--muted)
+    }
+
+    .side-shot {
+      background: linear-gradient(180deg, #ffffff, #eef5ff);
+      border: 1px solid var(--line);
+      border-radius: 32px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      min-height: 420px
+    }
+
+    .side-shot img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 18px
+    }
+
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+      flex: 1
+    }
+
+    .box {
+      position: relative;
+      background: rgba(255, 255, 255, .74);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, .82);
+      border-radius: var(--radius);
+      padding: 24px 24px 22px;
+      box-shadow: 0 12px 38px rgba(16, 44, 84, .07), inset 0 1px 0 rgba(255, 255, 255, .45);
+      opacity: .15;
+      transform: translateY(24px) scale(.992);
+      transition: opacity 1s ease, transform 1.2s cubic-bezier(.16, 1, .3, 1), box-shadow .55s ease, background .55s ease, filter 1s ease;
+      will-change: transform, opacity
+    }
+
+    .box::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .18), rgba(255, 255, 255, 0));
+      pointer-events: none
+    }
+
+    .box.in-view {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0)
+    }
+
+    .box.out-view {
+      opacity: .22;
+      transform: translateY(16px) scale(.988);
+      filter: blur(1px)
+    }
+
+    .box:hover {
+      box-shadow: 0 18px 44px rgba(16, 44, 84, .10), inset 0 1px 0 rgba(255, 255, 255, .55)
+    }
+
+    .box p {
+      color: #33425b;
+      font-size: 17px;
+      line-height: 1.48
+    }
+
+    .box {
+      overflow: hidden
+    }
+
+    .box ul {
+      margin: 10px 0 0;
+      padding-left: 18px
+    }
+
+    .box li {
+      margin: 8px 0;
+      color: #33425b;
+      font-size: 17px;
+      line-height: 1.42
+    }
+
+    .kpi-n {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      min-height: 170px
+    }
+
+    .kpi {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 170px
+    }
+
+    .kpi .n {
+      font-size: 56px;
+      font-weight: 800;
+      letter-spacing: -.05em;
+      color: var(--blue)
+    }
+
+    .kpi .label {
+      font-size: 16px;
+      font-weight: 700
+    }
+
+    .span-3 {
+      grid-column: span 3
+    }
+
+    .span-4 {
+      grid-column: span 4
+    }
+
+    .span-5 {
+      grid-column: span 5
+    }
+
+    .span-6 {
+      grid-column: span 6
+    }
+
+    .span-7 {
+      grid-column: span 7
+    }
+
+    .span-8 {
+      grid-column: span 8
+    }
+
+    .span-12 {
+      grid-column: 1/-1
+    }
+
+    .row-2 {
+      min-height: 170px;
+      max-height: 220px
+    }
+
+    .row-3 {
+      min-height: 240px;
+      max-height: 280px
+    }
+
+    .row-4 {
+      min-height: 320px;
+      max-height: 360px
+    }
+
+    .accent {
+      background: linear-gradient(180deg, #1a79d8, #0e5fb7);
+      color: #fff;
+      border-color: rgba(255, 255, 255, .25)
+    }
+
+    .accent p,
+    .accent li,
+    .accent .note {
+      color: #eef6ff
+    }
+
+    .accent .eyebrow {
+      background: rgba(255, 255, 255, .14);
+      color: #fff
+    }
+
+    .soft {
+      background: linear-gradient(180deg, #f9fbff, #eef5ff)
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse
+    }
+
+    th,
+    td {
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 16px;
+      line-height: 1.38
+    }
+
+    th {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--muted)
+    }
+
+    .screens {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      height: 100%
+    }
+
+    .screen {
+      border: 2px dashed rgba(23, 116, 209, .22);
+      border-radius: 24px;
+      background: #f7fbff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 310px;
+      padding: 20px;
+      text-align: center
+    }
+
+    .screen.tall {
+      min-height: 420px;
+      max-height: 420px
+    }
+
+    .screen.wide {
+      min-height: 250px;
+      max-height: 250px
+    }
+
+    .screen strong {
+      font-size: 20px
+    }
+
+    .screen span {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.4;
+      max-width: 320px
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 14px
+    }
+
+    .mini {
+      padding: 16px;
+      border-radius: 20px;
+      background: #f6faff;
+      border: 1px solid var(--line)
+    }
+
+    .mini h4 {
+      margin: 0 0 6px;
+      font-size: 16px
+    }
+
+    .mini p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--muted)
+    }
+
+    .nav {
+      position: fixed;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 10
+    }
+
+    .nav a {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #b5c6de;
+      border: 1px solid rgba(0, 0, 0, .08)
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--muted);
+      font-size: 12px;
+      padding-top: 6px;
+      opacity: .9
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(6px);
+      pointer-events: none;
+      opacity: .55
+    }
+
+    .orb.a {
+      width: 18px;
+      height: 18px;
+      left: 7%;
+      top: 18%;
+      background: rgba(23, 116, 209, .22)
+    }
+
+    .orb.b {
+      width: 10px;
+      height: 10px;
+      right: 12%;
+      top: 26%;
+      background: rgba(23, 116, 209, .18)
+    }
+
+    .orb.c {
+      width: 14px;
+      height: 14px;
+      right: 18%;
+      bottom: 18%;
+      background: rgba(23, 116, 209, .16)
+    }
+
+    .grid-glow {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: .32;
+      background-image: linear-gradient(rgba(23, 116, 209, .05) 1px, transparent 1px), linear-gradient(90deg, rgba(23, 116, 209, .05) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, .6), transparent 85%)
+    }
+
+    @media (max-width: 1100px) {
+      .hero {
+        grid-template-columns: 1fr
+      }
+
+      .bento {
+        grid-template-columns: 1fr
+      }
+
+      .span-3,
+      .span-4,
+      .span-5,
+      .span-6,
+      .span-7,
+      .span-8,
+      .span-12 {
+        grid-column: 1/-1
+      }
+
+      .screens {
+        grid-template-columns: 1fr
+      }
+
+      h1 {
+        font-size: 42px
+      }
+
+      h2 {
+        font-size: 30px
+      }
+
+      .slide {
+        padding: 22px
+      }
+    }
+
+    .story-points {
+      margin: 2rem 0 0;
+      padding-left: 1.35rem;
+      max-width: 32rem;
+    }
+
+    .story-points li {
+      margin-bottom: 0.55rem;
+      padding-left: 0.2rem;
+      font-size: clamp(1.15rem, 1.5vw, 1.45rem);
+      line-height: 1.18;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .box--video {
+      display: grid;
+      grid-template-columns: 1.2fr 0.9fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .box__text {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0;
+    }
+
+    .box__video {
+      border-radius: 18px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      margin-top: 8px;
+    }
+
+    .box__video video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 170px;
+      object-fit: cover;
+    }
+
+    @media (max-width: 980px) {
+      .story-points {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="nav">
+    <a href="#s1"></a><a href="#s2"></a><a href="#s3"></a><a href="#s4"></a><a href="#s5"></a><a href="#s6"></a><a
+      href="#s7"></a><a href="#s8"></a><a href="#s9"></a><a href="#s10"></a><a href="#s11"></a><a href="#s12"></a><a
+      href="#s13"></a><a href="#s14"></a><a href="#s15"></a><a href="#s16"></a><a href="#s17"></a><a href="#s18"></a><a href="#s19"></a><a href="#s20"></a>
+  </div>
+
+  <main class="deck">
+    <div class="grid-glow"></div>
+    <div class="orb a"></div>
+    <div class="orb b"></div>
+    <div class="orb c"></div>
+    <section class="slide" id="s1">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand">
+            <img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/logo.png" alt="PaintSmart logo" />
+            <div class="meta">
+              <strong>PaintSmart</strong>
+              <span>Product analysis and competitive benchmark</span>
+            </div>
+          </div>
+          <div class="page">01</div>
+        </div>
+        <div class="hero">
+          <div class="headline">
+            <div class="eyebrow">Product Assessment</div>
+            <h1>Create <span style="color: var(--blue)">Faster</span> Proposals. Win More <span
+                style="color: var(--blue); font-style: italic">Clarity</span>.</h1>
+            <p class="lead" style="margin-top:2rem;">How can PaintSmart become a stronger product for self-employed
+              painters and small field
+              teams?</p>
+          </div>
+          <div class="side-shot"><img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/pexels-perapiiz-7495857.jpg" alt="PaintSmart landing page" /></div>
+        </div>
+      </div>
+    </section>
+    <section class="slide" id="s2">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand">
+            <img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/logo.png" alt="PaintSmart logo" />
+            <div class="meta">
+              <strong>PaintSmart</strong>
+              <span>Product analysis and competitive benchmark</span>
+            </div>
+          </div>
+          <div class="page">02</div>
+        </div>
+        <div class="hero">
+          <div class="headline">
+            <div class="eyebrow" style="margin-bottom: 1rem;">Product Assessment</div>
+            <h2>This presentation builds on the current analysis and reorganizes it into a clearer story:</h2></br></br>
+            <ol class="story-points">
+              <li>What PaintSmart already does well?</li>
+              <li>Where the product creates friction?</li>
+              <li>How it compares with its competitors?</li>
+              <li>What should be prioritized next?</li>
+            </ol>
+          </div>
+          <div class="side-shot"><img src="pexels-tima-miroshnichenko-6474462.jpg" alt="PaintSmart landing page" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="s3">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/logo.png" alt="logo" />
+            <div class="meta"><strong>Executive overview</strong><span>What matters most</span></div>
+          </div>
+          <div class="page">03</div>
+        </div>
+        <div class="bento">
+          <div class="box accent span-7 row-3">
+            <div class="eyebrow">Main takeaway</div>
+            <h2>PaintSmart already has the foundation of a promising FSM-lite workflow.</h2>
+            <p>The strongest part of the product is not the brand promise alone; it is the operational structure behind
+              proposals, conversion into jobs and some setup guidance that shows your team is thinking in the fully-built system, not
+              isolated screens.</p>
+          </div>
+          <div class="box span-5 kpi row-3">
+            <div>
+              <div class="n">3</div>
+              <div class="label">Core strengths</div>
+            </div>
+            <p>Proposal flow, automation potential and evidence of structured job management.</p>
+          </div>
+          <div class="box span-4">
+            <h3>What works well</h3>
+            <p>Proposal-to-job logic, proposal organization by status and pre-structured preparation/painting items
+              suggest real productivity value.</p>
+          </div>
+          <div class="box span-4">
+            <h3>Main friction</h3>
+            <p>The product asks the user to understand a business system before clearly teaching the first-use flow and
+              the worfklow behind it.</p>
+          </div>
+          <div class="box span-4">
+            <h3>Strategic tension</h3>
+            <p>The communication says self-employed painter; the product behavior often feels closer to a broader field
+              service tool.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="s4">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/logo.png" alt="logo" />
+            <div class="meta"><strong>What PaintSmart does well</strong><span>Positive findings</span></div>
+          </div>
+          <div class="page">04</div>
+        </div>
+        <div class="bento">
+          <div class="box span-4 row-5 soft">
+            <h3>Setup progress</h3>
+            <p>Even though it is hidden, the existence of a setup progress/checklist is a good sign. It means the
+              product already contains an onboarding structure that can be surfaced and strengthened.</p>
+            <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/setup.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-4 row-5">
+            <h3>Proposals → Job</h3>
+            <p>The transition from commercial intent into operational work is one of the strongest ideas in the product.
+              It gives PaintSmart a practical backbone instead of being only a quote generator.</p>
+            <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/proposals.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-4 row-5 soft">
+            <h3>Automation direction</h3>
+            <p>Prepared proposal sections, preparation items and painting items point to speed, repeatability and
+              standardization, which are highly valuable for small service operations.</p>
+            <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/repeatable.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-6">
+            <h3>Status organization</h3>
+            <p>Separating proposals into status-based groups helps create a clearer operational funnel and is better
+              than a single flat list.</p>
+            <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/steps.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-6">
+            <h3>Client-facing accessibility</h3>
+            <p>Letting the client view a proposal online is a positive accessibility move, even if the handoff could
+              still be simplified.</p>
+            <div class="box__video">
+              <img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/email.png" style="max-width: 100%">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="s5">
+      <div class="frame compact">
+        <div class="topbar">
+          <div class="brand"><img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/logo.png" alt="logo" />
+            <div class="meta"><strong>Main UX gaps</strong><span>What creates friction today</span></div>
+          </div>
+          <div class="page">05</div>
+        </div>
+        <div class="bento">
+          <div class="box span-3 kpi">
+            <div>
+              <div class="n">1</div>
+              <div class="label">Onboarding clarity</div>
+            </div>
+            <p>The first-use experience does not clearly teach where to begin or how value is unlocked.</p>
+          </div>
+          <div class="box span-3 kpi">
+            <div>
+              <div class="n">2</div>
+              <div class="label">Workflow</div>
+            </div>
+            <p>Lead, client, proposal and job are not always introduced in a way that feels intuitive.</p>
+          </div>
+          <div class="box span-3 kpi">
+            <div>
+              <div class="n">3</div>
+              <div class="label">Visibility</div>
+            </div>
+            <p>Important product guidance exists, but it is hidden or secondary when it should be primary.</p>
+          </div>
+          <div class="box span-3 kpi">
+            <div>
+              <div class="n">4</div>
+              <div class="label">Continuity</div>
+            </div>
+            <p>Some transitions remove context, such as losing proposal history once it becomes a job.</p>
+          </div>
+          <div class="box span-6 row-2">
+            <h3>Specific issues to present</h3>
+            <ul>
+              <li>Functionality did not surface clearly during trial setup.</li>
+              <li>Setup checklist is useful but visually hidden.</li>
+              <li>“Add proposal” behavior can create confusion around the selected customer.</li>
+              <li>Online proposal view still leads to a less direct document flow.</li>
+            </ul>
+          </div>
+          <div class="box span-6 row-2 soft">
+            <h3>Design implication</h3>
+            <p>The issue is not only missing features. It is also sequencing: the product reveals complexity before it
+              creates confidence.</p>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="s6">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/logo.png" alt="logo" />
+            <div class="meta"><strong>Main UX gaps</strong><span>What creates friction today</span></div>
+          </div>
+          <div class="page">06</div>
+        </div>
+        <div class="bento">
+          <div class="box span-8">
+            <h2>1. Onboarding Clarity</h2>
+            <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/first_setup.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-4" style="justify-content: center;">
+            <ul>
+              <li><strong>PaintSmart has no effective initial onboarding:</strong> the user lands directly in the
+                product without context,
+                orientation or a clear first action.</li>
+              <li><strong>The issue goes beyond first access:</strong> the product also lacks feature onboarding, so
+                users must infer how
+                core objects and workflows are supposed to work.</li>
+            </ul>
+          </div>
+          <div class="box span-12">
+            <p>As a result, the system exposes structure before it creates understanding.</p>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="s7">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/logo.png" alt="logo" />
+            <div class="meta"><strong>Main UX gaps</strong><span>What creates friction today</span></div>
+          </div>
+          <div class="page">07</div>
+        </div>
+        <div class="bento">
+          <div class="box span-8">
+            <h2>2. Workflow (Lead → Customer)</h2>
+            <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/customer_creation.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-4" style="justify-content: center;">
+            <ul>
+              <li><strong>PaintSmart does not have a real lead layer:</strong> every new prospect is created directly as
+                a customer, so the product does not distinguish between an early-stage lead and an actual client</li>
+              <li><strong>This makes the customer model heavier than it should be:</strong> users are forced to treat
+                every contact as a fully formed customer, even when the relationship is still pre-sale or unqualified.
+              </li>
+              <li><strong>A lead/customer separation might  make more sense:</strong> the product could keep the current
+                proposal/job structure, while adding a lighter lead stage before the customer record is created.</li>
+            </ul>
+          </div>
+          <div class="box span-12">
+            <p>As a result, the system exposes structure before it creates understanding.</p>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="s8">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/logo.png" alt="logo" />
+            <div class="meta"><strong>Main UX gaps</strong><span>What creates friction today</span></div>
+          </div>
+          <div class="page">08</div>
+        </div>
+        <div class="bento">
+          <div class="box span-8">
+            <h2>3. Visibility</h2>
+            <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/setup.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-4" style="justify-content: center;">
+            <ul>
+              <li><strong>PaintSmart has setup progress, but not feature onboarding:</strong> the product gives the user
+                a company configuration checklist, but it does not guide them through the core features afterward.</li>
+              <li><strong>The current onboarding stops too early:</strong> once the company setup is done, the app seems
+                to drop the user into the interface without teaching how to actually use the product.
+              </li>
+              <li><strong>This makes the app harder to adopt:</strong> the user may complete configuration but still not understand what to do next or how each feature fits into the workflow.</li>
+            </ul>
+          </div>
+          <div class="box span-12">
+            <p>As a result, the current experience shows the interface to the user, but lacks providing enough guidance and helping them seeing value in the app.</p>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="s9">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/logo.png" alt="logo" />
+            <div class="meta"><strong>Main UX gaps</strong><span>What creates friction today</span></div>
+          </div>
+          <div class="page">09</div>
+        </div>
+        <div class="bento">
+          <div class="box span-8">
+            <h2>4. Continuity (Proposal → Job)</h2>
+            <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/signed_proposal.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-4" style="justify-content: center;">
+            <ul>
+              <li><strong>The proposal-to-job transition is not clearly communicated:</strong> when a proposal is
+                signed, it becomes a job, but the system does not seem to give a visible success message or a clear
+                confirmation of the change.</li>
+              <li><strong>This makes the state change feel abrupt:</strong> the user may not immediately understand that
+                the proposal was converted and the job now exists as a new stage in the workflow.</li>
+              <li><strong>The historical context is not preserved well enough:</strong> once the proposal becomes a job,
+                the user loses easy access to the original proposal history and the signature context.</li>
+            </ul>
+          </div>
+          <div class="box span-12">
+            <p>As a result, this makes harder for users to know what became a job and how the proposal was approved and
+              what happened before execution.</p>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="s10">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/logo.png" alt="logo" />
+            <div class="meta"><strong>Core product tension</strong><span>Positioning vs product reality</span></div>
+          </div>
+          <div class="page">10</div>
+        </div>
+        <div class="bento">
+          <div class="box accent span-5 row-6">
+            <div class="eyebrow">Key observation</div>
+            <h2>The current message and the current system do not fully point to the same user.</h2>
+            <p>When the brand says “self-employed painter”, the expected product is simpler, faster and more
+              assistance-driven. When the product behaves like an FSM, users expect clearer CRM structure, scheduling
+              logic, negotiation support and operational continuity.</p>
+          </div>
+          <div class="box span-7 row-6">
+            <h3>What this means for the product strategy?</h3>
+            <div class="mini-grid">
+              <div class="mini">
+                <h4>If the target is self-employed</h4>
+                <p>Reduce complexity, guide the first win quickly, support ad-hoc lead intake, simplify daily planning
+                  and separate owner life from company operations.</p>
+              </div>
+              <div class="mini">
+                <h4>If the target is small teams</h4>
+                <p>Lean into FSM logic, improve job management, calendar visibility, status clarity, crew coordination
+                  and a stronger customer record.</p>
+              </div>
+              <div class="mini">
+                <h4>Current state</h4>
+                <p>The product sits between those two worlds, which creates friction in both messaging and usability.
+                </p>
+              </div>
+              <div class="mini">
+                <h4>Recommendation</h4>
+                <p>Choose the primary ICP first, then adjust onboarding, roadmap and marketing around that decision.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="s11">
+      <div class="frame compact">
+        <div class="topbar">
+          <div class="brand"><img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/logo.png" alt="logo" />
+            <div class="meta"><strong>Functional gaps for the ICP</strong><span>Especially for self-employed
+                users</span></div>
+          </div>
+          <div class="page">11</div>
+        </div>
+        <div class="bento">
+          <div class="box span-4">
+            <h3>Lead handling</h3>
+            <p>The product would benefit from a lightweight way to capture and qualify leads before forcing them into a
+              client/job structure.</p>
+              <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/leads.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-4 soft">
+            <h3>Negotiation support</h3>
+            <p>There is little support for the real commercial back-and-forth that happens before a proposal becomes
+              accepted work.</p>
+              <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/negotiation.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-4">
+            <h3>Calendar integration</h3>
+            <p>For a self-employed painter, simple visibility into schedule may matter more than heavy workforce
+              management.</p>
+              <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/calendar.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-6 soft">
+            <h3>Financial reality of self-employed workers</h3>
+            <p>Self-employed users often mix individual and business finances. There is an opportunity to support a
+              simpler operating model, rather than only a company-style management structure.</p>
+              <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/finances.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-6 row-2">
+            <h3>Product direction</h3>
+            <ul>
+              <li>Strategic framing: the current scope fits an FSM direction better than a purely self-employed workflow.</li>
+              <li>Roadmap implication: the chosen ICP should drive how much the product is simplified or expanded.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="s12">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/logo.png" alt="logo" />
+            <div class="meta"><strong>Benchmark lens</strong><span>Why Jobber and Workever</span></div>
+          </div>
+          <div class="page">12</div>
+        </div>
+        <div class="bento">
+          <div class="box accent span-6 row-2">
+            <h3>Why these competitors</h3>
+            <p>They are more relevant comparators for PaintSmart because they are closer to the small business and
+              approachable-trial context you are evaluating.</p>
+          </div>
+          <div class="box span-6 row-2">
+            <h3>Why not ServiceTitan</h3>
+            <p>It was excluded from the core benchmark because its access model and broader operational footprint make
+              it less suitable for a like-for-like comparison with a product aimed at smaller operators.</p>
+          </div>
+          <div class="box span-12">
+            <table>
+              <thead>
+                <tr>
+                  <th>Dimension</th>
+                  <th>PaintSmart</th>
+                  <th>Jobber</th>
+                  <th>Workever</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Positioning clarity</td>
+                  <td>Needs sharper ICP definition.</td>
+                  <td>More explicit about home service workflows.</td>
+                  <td>Feels closer to small team operations.</td>
+                </tr>
+                <tr>
+                  <td>First-use clarity</td>
+                  <td>Promising structure, but hidden guidance.</td>
+                  <td>More guided and conversion-oriented.</td>
+                  <td>Usable, though some flows are long.</td>
+                </tr>
+                <tr>
+                  <td>Commercial → operational flow</td>
+                  <td>One of the strongest parts.</td>
+                  <td>Mature and clearly connected.</td>
+                  <td>Functional, but can feel heavier.</td>
+                </tr>
+                <tr>
+                  <td>Best takeaway for PaintSmart</td>
+                  <td>Clarify flow and target user.</td>
+                  <td>Improve onboarding, CRM continuity and persuasion.</td>
+                  <td>Improve operational visibility without overcomplicating the experience.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="s13">
+      <div class="frame compact">
+        <div class="topbar">
+          <div class="brand"><img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/logo.png" alt="logo" />
+            <div class="meta"><strong>What PaintSmart can learn from Jobber</strong><span>Adoptable patterns</span>
+            </div>
+          </div>
+          <div class="page">13</div>
+        </div>
+        <div class="bento">
+          <div class="box span-4">
+            <h3>More explicit onboarding</h3>
+            <p>Jobber sets expectations earlier and helps users understand the path to value faster.</p>
+            <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/jobber3a.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-4 soft">
+            <h3>Stronger customer record</h3>
+            <p>A more complete client view makes commercial history, billing and communication easier to understand in
+              one place.</p>
+              <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/jobber4.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-4">
+            <h3>Marketing-to-product consistency</h3>
+            <p>Its landing page, calls to action and trial design work together to push the user toward activation.</p>
+            <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/jobber5.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-6">
+            <h3>Opportunity for PaintSmart</h3>
+            <p>Surface setup progress earlier, explain object relationships more clearly and connect the landing page
+              promise to the very first in-app actions.</p>
+          </div>
+          <div class="box span-6 soft">
+            <h3>Important nuance</h3>
+            <p>The takeaway is not “copy Jobber”. It is “borrow what improves clarity and trust without losing
+              PaintSmart’s own direction”.</p>
+          </div>
+        </div>
+        <!-- <div class="footer"><span>Benchmark section</span><span>Focus on transferable ideas</span></div> -->
+      </div>
+    </section>
+
+    <section class="slide" id="s14">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/logo.png" alt="logo" />
+            <div class="meta"><strong>What PaintSmart can learn from Jobber</strong><span>Cognitive Bias</span></div>
+          </div>
+          <div class="page">14</div>
+        </div>
+        <div class="bento">
+          <div class="box span-8">
+            <h2>1. Bandwagoning through social proof</h2>
+            <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/jobbercb1.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-4" style="justify-content: center;">
+            <ul>
+              <li><strong>Jobber applies bandwagoning from the first screen:</strong> ratings, review counts, and customer imagery quickly signal market validation.</li>
+              <li><strong>This builds confidence before explanation:</strong> the visitor feels that the product is already trusted by others in the same industry.</li>
+              <li><strong>PaintSmart could use stronger social proof earlier:</strong>  testimonials, review volume, and visible customer adoption would help reduce friction at first contact.</li>
+            </ul>
+          </div>
+          <div class="box span-12">
+            <p>Jobber does not wait to explain the product first, but to first show that many others already trust it.</p>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="s15">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/logo.png" alt="logo" />
+            <div class="meta"><strong>What PaintSmart can learn from Jobber</strong><span>Cognitive Bias</span></div>
+          </div>
+          <div class="page">15</div>
+        </div>
+        <div class="bento">
+          <div class="box span-8">
+            <h2>2. Zero-Risk through Trials</h2>
+            <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/jobbercb2.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-4" style="justify-content: center;">
+            <ul>
+              <li><strong>Jobber reduces perceived risk from the first screen:</strong> the free-trial framing makes adoption feel easier and safer.</li>
+              <li><strong>This lowers commitment anxiety:</strong> the user feels they can explore the product before making a stronger decision.</li>
+              <li><strong>PaintSmart could make first use feel safer too:</strong> clearer onboarding and faster visible value would reduce hesitation at the start.</li>
+            </ul>
+          </div>
+          <div class="box span-12">
+            <p>Jobber does not ask the user to commit first, but first makes the product feel safe to try.</p>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="s16">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/logo.png" alt="logo" />
+            <div class="meta"><strong>What PaintSmart can learn from Jobber</strong><span>Cognitive Bias</span></div>
+          </div>
+          <div class="page">16</div>
+        </div>
+        <div class="bento">
+          <div class="box span-8">
+            <h2>3. Creating urgency to act (FOMO)</h2>
+            <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/jobbercb3.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-4" style="justify-content: center;">
+            <ul>
+              <li><strong>Jobber uses FOMO through time-sensitive messaging:</strong> limited offers create a reason to act now instead of later.</li>
+              <li><strong>This reduces decision inertia:</strong> the user feels that delaying may mean losing a benefit already available.</li>
+              <li><strong>PaintSmart could introduce softer urgency cues:</strong> activation prompts and time-based incentives could help increase early engagement.</li>
+            </ul>
+          </div>
+          <div class="box span-12">
+            <p>Jobber does not only explain why the product matters, but also gives the user a reason to act now.</p>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="s17">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/logo.png" alt="logo" />
+            <div class="meta"><strong>What PaintSmart can learn from Jobber</strong><span>Optimized SEO</span></div>
+          </div>
+          <div class="page">17</div>
+        </div>
+        <div class="bento">
+          <div class="box span-8">
+            <h2>4. Optimized SEO</h2>
+            <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/jobbercb4.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-4" style="justify-content: center;">
+            <ul>
+              <li><strong>Jobber uses SEO to win high-intent comparison traffic:</strong> competitor pages help it appear when buyers search for alternatives.</li>
+              <li><strong>This supports both discoverability and positioning:</strong>  the brand is found at the exact moment users are comparing options.</li>
+              <li><strong>PaintSmart could replicate this with comparison-led content:</strong> SEO pages focused on alternatives and competitor trade-offs could strengthen acquisition.</li>
+            </ul>
+          </div>
+          <div class="box span-12">
+            <p>Jobber does not rely only on brand discovery, but also intercepts users who are already comparing tools.</p>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="s18">
+      <div class="frame compact">
+        <div class="topbar">
+          <div class="brand"><img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/logo.png" alt="logo" />
+            <div class="meta"><strong>What PaintSmart can learn from Workever</strong><span>Operational learnings</span>
+            </div>
+          </div>
+          <div class="page">18</div>
+        </div>
+        <div class="bento">
+          <div class="box span-4 soft">
+            <h3>Operational breadth</h3>
+            <p>Workever shows how an FSM can support jobs, forms, scheduling and field execution more broadly.</p>
+            <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/workever2.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-4">
+            <h3>Trade-off</h3>
+            <p>More breadth can also create longer, heavier flows. This is useful because it shows what PaintSmart
+              should avoid while it grows.</p>
+              <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/workever3.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-4 soft">
+            <h3>Key takeaway</h3>
+            <p>PaintSmart can expand operationally, but it should protect simplicity and avoid overwhelming the
+              first-time user.</p>
+              <div class="box__video">
+              <video autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+                <source src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/video/workever4.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          <div class="box span-12 row-2">
+            <h3>Recommendation</h3>
+            <p>Adopt only the Workever patterns that improve job execution, visibility and continuity. Do not import
+              complexity that weakens the self-employed or small-team experience.</p>
+          </div>
+        </div>
+        <!-- <div class="footer"><span>Benchmark section</span><span>Learn from strengths and trade-offs</span></div> -->
+      </div>
+    </section>
+
+    <!-- <section class="slide" id="s10">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><img src="image-2.jpg" alt="logo" />
+            <div class="meta"><strong>Screenshot comparison</strong><span>Slide template 1</span></div>
+          </div>
+          <div class="page">10</div>
+        </div>
+        <div class="bento">
+          <div class="box span-12">
+            <h2>Task comparison: creating the first proposal</h2>
+            <p class="note">Use the same task on both products. Add numbered callouts to show friction, clarity and
+              time-to-value.</p>
+          </div>
+          <div class="box span-6 row-4">
+            <div class="screens">
+              <div class="screen"><strong>PaintSmart screenshot</strong><span>Suggested focus: first CTA, required
+                  fields, proposal structure, client selection, setup guidance.</span></div>
+            </div>
+          </div>
+          <div class="box span-6 row-4">
+            <div class="screens">
+              <div class="screen"><strong>Jobber or Workever screenshot</strong><span>Suggested focus: onboarding cues,
+                  object clarity, quote flow, ease of completion.</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="footer"><span>Add screenshots</span><span>Task-based comparison works better than random UI
+            comparison</span></div>
+      </div>
+    </section>
+
+    <section class="slide" id="s11">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><img src="image-2.jpg" alt="logo" />
+            <div class="meta"><strong>Screenshot comparison</strong><span>Slide template 2</span></div>
+          </div>
+          <div class="page">11</div>
+        </div>
+        <div class="bento">
+          <div class="box span-12">
+            <h2>Task comparison: proposal approved → job follow-through</h2>
+            <p class="note">This is one of PaintSmart’s strongest opportunities to shine. Use this slide to show where
+              the product already has a differentiated backbone and where continuity still breaks.</p>
+          </div>
+          <div class="box span-6 row-4">
+            <div class="screen"><strong>PaintSmart screenshot area</strong><span>Suggested focus: signed proposal, job
+                creation, what context is preserved, what history disappears, what becomes easier.</span></div>
+          </div>
+          <div class="box span-6 row-4">
+            <div class="screen"><strong>Competitor screenshot area</strong><span>Suggested focus: continuity of data,
+                customer history, attachments, next actions and job management visibility.</span></div>
+          </div>
+        </div>
+        <div class="footer"><span>Recommended additional comparison slides</span><span>Client record • scheduling •
+            mobile daily workflow • invoice/payment flow</span></div>
+      </div>
+    </section> -->
+
+    <section class="slide" id="s19">
+      <div class="frame compact">
+        <div class="topbar">
+          <div class="brand"><img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/logo.png" alt="logo" />
+            <div class="meta"><strong>Priority recommendations</strong><span>What to do next</span></div>
+          </div>
+          <div class="page">19</div>
+        </div>
+        <div class="bento">
+          <div class="box accent span-4 row-3">
+            <h3>1. Define the primary ICP</h3>
+            <p>Choose whether PaintSmart is first for self-employed painters or for small field teams. This decision
+              should drive roadmap and messaging.</p>
+          </div>
+          <div class="box span-4 row-3">
+            <h3>2. Make the first-use path obvious</h3>
+            <p>Bring setup progress forward, clarify the first key action and explain how proposals, clients and jobs
+              relate.</p>
+          </div>
+          <div class="box span-4 row-3 soft">
+            <h3>3. Preserve continuity</h3>
+            <p>Keep commercial and operational history connected after a proposal becomes a job, so users never lose
+              context.</p>
+          </div>
+          <div class="box span-6">
+            <h3>4. Strengthen the self-employed workflow</h3>
+            <p>Add lighter lead capture, negotiation support and simpler schedule visibility if the chosen ICP remains
+              self-employed professionals.</p>
+          </div>
+          <div class="box span-6">
+            <h3>5. Align product and brand</h3>
+            <p>Landing page, onboarding, feature emphasis and value proposition should all tell the same story about who
+              the product is for and why it wins.</p>
+          </div>
+        </div>
+        <!-- <div class="footer"><span>Closing message</span><span>PaintSmart has a strong base; the next step is sharper
+            focus and clearer product communication</span></div> -->
+      </div>
+    </section>
+
+    <!-- <section class="slide" id="s12a">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><img src="image-2.jpg" alt="logo" />
+            <div class="meta"><strong>Screenshot comparison</strong><span>Slide template 3</span></div>
+          </div>
+          <div class="page">12A</div>
+        </div>
+        <div class="bento">
+          <div class="box span-12">
+            <h2>Task comparison: lead or customer creation flow</h2>
+            <p class="note">Use this slide to compare object clarity, naming, required information and how fast a
+              first-time user understands what to create first.</p>
+          </div>
+          <div class="box span-6 row-4">
+            <div class="screen tall"><strong>PaintSmart screenshot area</strong><span>Suggested focus: lead vs client
+                ambiguity, field clarity, first required step, relationship with proposal creation.</span></div>
+          </div>
+          <div class="box span-6 row-4">
+            <div class="screen tall"><strong>Competitor screenshot area</strong><span>Suggested focus: data model
+                clarity, progressive disclosure, copywriting and first-use confidence.</span></div>
+          </div>
+        </div>
+        <div class="footer"><span>Extra scenario</span><span>Helps support the mental-model argument</span></div>
+      </div>
+    </section>
+
+    <section class="slide" id="s12b">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><img src="image-2.jpg" alt="logo" />
+            <div class="meta"><strong>Screenshot comparison</strong><span>Slide template 4</span></div>
+          </div>
+          <div class="page">12B</div>
+        </div>
+        <div class="bento">
+          <div class="box span-12">
+            <h2>Task comparison: scheduling and daily workflow</h2>
+            <p class="note">Good for showing whether the product is really built for self-employed users, small teams or
+              a broader FSM model.</p>
+          </div>
+          <div class="box span-6 row-4">
+            <div class="screen tall"><strong>PaintSmart screenshot area</strong><span>Suggested focus: job scheduling,
+                today view, check-in/check-out, calendar visibility and simplicity.</span></div>
+          </div>
+          <div class="box span-6 row-4">
+            <div class="screen tall"><strong>Competitor screenshot area</strong><span>Suggested focus: dispatch logic,
+                day planning, worker view and operational visibility.</span></div>
+          </div>
+        </div>
+        <div class="footer"><span>Extra scenario</span><span>Useful for the ICP discussion</span></div>
+      </div>
+    </section>
+
+    <section class="slide" id="s12c">
+      <div class="frame">
+        <div class="topbar">
+          <div class="brand"><img src="image-2.jpg" alt="logo" />
+            <div class="meta"><strong>Screenshot comparison</strong><span>Slide template 5</span></div>
+          </div>
+          <div class="page">12C</div>
+        </div>
+        <div class="bento">
+          <div class="box span-12">
+            <h2>Task comparison: customer record, invoice and payment continuity</h2>
+            <p class="note">Use this slide to show whether the product closes the loop well after the service is sold
+              and scheduled.</p>
+          </div>
+          <div class="box span-6 row-4">
+            <div class="screen tall"><strong>PaintSmart screenshot area</strong><span>Suggested focus: invoice
+                visibility, payment milestones, client context and where information gets fragmented.</span></div>
+          </div>
+          <div class="box span-6 row-4">
+            <div class="screen tall"><strong>Competitor screenshot area</strong><span>Suggested focus: billing overview,
+                overdue visibility, linked records and customer history.</span></div>
+          </div>
+        </div>
+        <div class="footer"><span>Extra scenario</span><span>Strong support for the continuity story</span></div>
+      </div>
+
+      <section class="slide" id="s12d">
+        <div class="frame">
+          <div class="topbar">
+            <div class="brand"><img src="image-2.jpg" alt="logo" />
+              <div class="meta"><strong>Comparison layout</strong><span>Three-column evidence board</span></div>
+            </div>
+            <div class="page">12D</div>
+          </div>
+          <div class="bento">
+            <div class="box span-12">
+              <h2>Side-by-side evidence board</h2>
+              <p class="note">Useful when you want to compare the same scenario across PaintSmart, Jobber and Workever
+                in one screen.</p>
+            </div>
+            <div class="box span-4 row-3">
+              <h3>PaintSmart</h3>
+              <div class="screen wide"><strong>Screenshot area</strong><span>Insert one screenshot plus 2 to 3 short
+                  callouts.</span></div>
+            </div>
+            <div class="box span-4 row-3">
+              <h3>Jobber</h3>
+              <div class="screen wide"><strong>Screenshot area</strong><span>Use the exact same task for
+                  comparability.</span></div>
+            </div>
+            <div class="box span-4 row-3">
+              <h3>Workever</h3>
+              <div class="screen wide"><strong>Screenshot area</strong><span>Highlight differences in workflow, density
+                  and clarity.</span></div>
+            </div>
+            <div class="box span-12">
+              <h3>Best use cases</h3>
+              <p>Great for onboarding comparison, quote creation, customer record, job detail page or invoice/payment
+                screen.</p>
+            </div>
+          </div>
+          <div class="footer"><span>Alternative layout</span><span>Three products on the same slide</span></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s12e">
+        <div class="frame">
+          <div class="topbar">
+            <div class="brand"><img src="image-2.jpg" alt="logo" />
+              <div class="meta"><strong>Comparison layout</strong><span>Hero screenshot + insight rail</span></div>
+            </div>
+            <div class="page">12E</div>
+          </div>
+          <div class="bento">
+            <div class="box span-8 row-4">
+              <h2>Primary screenshot focus</h2>
+              <div class="screen tall"><strong>Main comparison screenshot area</strong><span>Use this for the most
+                  important visual proof in the deck, such as PaintSmart vs Jobber proposal flow.</span></div>
+            </div>
+            <div class="box span-4 row-4">
+              <h3>Insight rail</h3>
+              <ul>
+                <li>What is easier to understand first?</li>
+                <li>Which screen has clearer next actions?</li>
+                <li>What feels more aligned with the ICP?</li>
+                <li>Where does PaintSmart already outperform?</li>
+                <li>What should be redesigned first?</li>
+              </ul>
+            </div>
+            <div class="box span-12">
+              <p>This layout works well when one image tells most of the story and the right side is used for sharp
+                executive commentary.</p>
+            </div>
+          </div>
+          <div class="footer"><span>Alternative layout</span><span>Best for a headline moment in the presentation</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" id="s12f">
+        <div class="frame">
+          <div class="topbar">
+            <div class="brand"><img src="image-2.jpg" alt="logo" />
+              <div class="meta"><strong>Comparison layout</strong><span>Before / after narrative</span></div>
+            </div>
+            <div class="page">12F</div>
+          </div>
+          <div class="bento">
+            <div class="box span-6 row-3">
+              <h3>Current PaintSmart experience</h3>
+              <div class="screen wide"><strong>Screenshot area</strong><span>Show current flow with the pain point
+                  highlighted.</span></div>
+            </div>
+            <div class="box span-6 row-3">
+              <h3>Reference pattern from competitor</h3>
+              <div class="screen wide"><strong>Screenshot area</strong><span>Show what better looks like in Jobber or
+                  Workever.</span></div>
+            </div>
+            <div class="box span-12">
+              <h3>Recommendation translation</h3>
+              <p>Use the bottom area to state the actionable design or product change that PaintSmart could adopt
+                without copying the competitor literally.</p>
+            </div>
+          </div>
+          <div class="footer"><span>Alternative layout</span><span>Good for turning benchmark into recommendation</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" id="s12g">
+        <div class="frame">
+          <div class="topbar">
+            <div class="brand"><img src="image-2.jpg" alt="logo" />
+              <div class="meta"><strong>Comparison layout</strong><span>Mobile + desktop split</span></div>
+            </div>
+            <div class="page">12G</div>
+          </div>
+          <div class="bento">
+            <div class="box span-3 row-4">
+              <h3>PaintSmart mobile</h3>
+              <div class="screen tall"><strong>Mobile screenshot</strong><span>Ideal for day-of-job flows, proposal
+                  preview or customer interaction moments.</span></div>
+            </div>
+            <div class="box span-5 row-4">
+              <h3>PaintSmart desktop</h3>
+              <div class="screen tall"><strong>Desktop screenshot</strong><span>Show the same object or workflow on the
+                  larger interface.</span></div>
+            </div>
+            <div class="box span-4 row-4">
+              <h3>Competitor reference</h3>
+              <div class="screen tall"><strong>Screenshot area</strong><span>Use Jobber or Workever to compare
+                  cross-device continuity.</span></div>
+            </div>
+          </div>
+          <div class="footer"><span>Alternative layout</span><span>Useful when mobile experience matters</span></div>
+        </div>
+      </section>
+
+      <section class="slide" id="s12h">
+        <div class="frame">
+          <div class="topbar">
+            <div class="brand"><img src="image-2.jpg" alt="logo" />
+              <div class="meta"><strong>Comparison layout</strong><span>Matrix of friction points</span></div>
+            </div>
+            <div class="page">12H</div>
+          </div>
+          <div class="bento">
+            <div class="box span-12">
+              <h2>Friction matrix by scenario</h2>
+              <p class="note">This layout is good when you want more synthesis and less screenshot area.</p>
+            </div>
+            <div class="box span-3">
+              <h3>Scenario</h3>
+              <p>Proposal creation<br />Customer setup<br />Scheduling<br />Invoice/payment</p>
+            </div>
+            <div class="box span-3">
+              <h3>PaintSmart</h3>
+              <p>What works, what confuses and what should improve first.</p>
+            </div>
+            <div class="box span-3">
+              <h3>Jobber</h3>
+              <p>Which patterns show stronger onboarding, continuity or persuasion.</p>
+            </div>
+            <div class="box span-3">
+              <h3>Workever</h3>
+              <p>Which patterns support operations better, and where complexity increases.</p>
+            </div>
+            <div class="box span-12">
+              <p>Use this as a synthesis slide before recommendations or after multiple screenshot-heavy slides.</p>
+            </div>
+          </div>
+          <div class="footer"><span>Alternative layout</span><span>Best for synthesis</span></div>
+        </div>
+      </section>
+    </section> -->
+
+    <section class="slide" id="s20">
+      <div class="frame compact">
+        <div class="topbar">
+          <div class="brand"><img src="https://oypiqxgffpanecuoousm.supabase.co/storage/v1/object/public/video/img/logo.png" alt="logo" />
+            <div class="meta"><strong>System synthesis</strong><span>Strengths and improvement opportunities</span>
+            </div>
+          </div>
+          <div class="page">20</div>
+        </div>
+        <div class="bento">
+          <div class="box accent span-4 row-2">
+            <h3>Strong proposal backbone</h3>
+            <p>PaintSmart already has one of the most valuable structural ideas in the product: proposals can become
+              jobs in a way that suggests a real operational system.</p>
+          </div>
+          <div class="box span-3 row-2">
+            <h3>Automation potential</h3>
+            <p>Prepared items and proposal logic point to real time-saving potential for repetitive work.</p>
+          </div>
+          <div class="box span-5 row-2 soft">
+            <h3>Setup guidance exists</h3>
+            <p>The setup progress is a hidden asset. It should become a visible engine for activation, not a buried
+              support element.</p>
+          </div>
+          <div class="box span-3 row-2">
+            <h3>Clarity gap</h3>
+            <p>Users still need help understanding where to start.</p>
+          </div>
+          <div class="box span-3 row-2">
+            <h3>Workflow needs simplification</h3>
+            <p>Lead, client, proposal and job should feel like a simple sequence, not internal system objects the user
+              must decode.</p>
+          </div>
+          <div class="box span-3 row-2">
+            <h3>Positioning tension</h3>
+            <p>The promise says self-employed; the product often behaves like an FSM.</p>
+          </div>
+          <div class="box span-3 row-2">
+            <h3>Benchmark takeaway</h3>
+            <p>Jobber teaches clarity. Workever teaches operational breadth and the cost of added complexity.</p>
+          </div>
+          <div class="box span-12 row-2">
+            <h2>PaintSmart has a credible foundation. The next leap comes from choosing the primary ICP, clarifying the
+              first-use flow and aligning product behavior with brand promise.</h2>
+          </div>
+        </div>
+        <!-- <div class="footer"><span>Closing synthesis</span><span>Organized / intentionally imperfect grid</span></div> -->
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const deck = document.querySelector('.deck');
+    const slides = document.querySelectorAll('.slide');
+    const boxes = document.querySelectorAll('.box');
+
+    const updateVisibility = () => {
+      const vh = window.innerHeight;
+      slides.forEach(slide => {
+        const r = slide.getBoundingClientRect();
+        const visible = Math.min(r.bottom, vh) - Math.max(r.top, 0);
+        const ratio = visible / Math.min(vh, r.height);
+        if (ratio > 0.28) slide.classList.add('in-view');
+        else slide.classList.remove('in-view');
+      });
+
+      boxes.forEach((box, i) => {
+        const r = box.getBoundingClientRect();
+        const visible = Math.min(r.bottom, vh) - Math.max(r.top, 0);
+        const ratio = visible / Math.min(vh, r.height);
+        if (ratio > 0.34) {
+          box.style.transitionDelay = `${(i % 6) * 70}ms`;
+          box.classList.add('in-view');
+          box.classList.remove('out-view');
+        } else {
+          box.style.transitionDelay = '0ms';
+          box.classList.remove('in-view');
+          box.classList.add('out-view');
+        }
+      });
+    };
+
+    let ticking = false;
+    const requestTick = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateVisibility();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    deck.addEventListener('scroll', requestTick, { passive: true });
+    window.addEventListener('resize', requestTick);
+    window.addEventListener('load', requestTick);
+    updateVisibility();
+  </script>
+</body>
+
+</html>
